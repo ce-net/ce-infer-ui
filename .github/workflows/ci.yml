@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout ce-infer-ui
+        uses: actions/checkout@v4
+        with:
+          path: ce-infer-ui
+
+      # ce-infer-ui depends on @ce-net/sdk via `file:../ce-ts`. Check the SDK out
+      # as a sibling and build it first so its dist/ + type declarations exist for
+      # ce-infer-ui's typecheck and bundle.
+      - name: Checkout ce-ts (sibling dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: ce-net/ce-ts
+          path: ce-ts
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install ce-ts
+        working-directory: ce-ts
+        run: npm install
+
+      - name: Build ce-ts
+        working-directory: ce-ts
+        run: npm run build
+
+      - name: Install ce-infer-ui
+        working-directory: ce-infer-ui
+        run: npm install
+
+      - name: Build ce-infer-ui
+        working-directory: ce-infer-ui
+        run: npm run build

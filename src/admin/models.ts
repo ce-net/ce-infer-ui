@@ -21,7 +21,7 @@ import type { ModelInfo } from "../lib/router.js";
 import { el, mount } from "../lib/dom.js";
 import { toast } from "../lib/toast.js";
 
-interface ModelRow {
+export interface ModelRow {
   id: string;
   liveWorkers: number;
   assignedNodes: number;
@@ -124,7 +124,7 @@ function modelRow(r: ModelRow): HTMLElement {
   );
 }
 
-function buildRows(models: ModelInfo[], nodes: FleetNode[]): ModelRow[] {
+export function buildRows(models: ModelInfo[], nodes: FleetNode[]): ModelRow[] {
   const byModel = new Map<string, { nodes: number; tiers: Set<string> }>();
   for (const n of nodes) {
     if (!n.model) continue;
@@ -152,7 +152,7 @@ function buildRows(models: ModelInfo[], nodes: FleetNode[]): ModelRow[] {
   return rows.sort((a, b) => b.liveWorkers - a.liveWorkers);
 }
 
-function replicaHealth(liveWorkers: number): { cls: string; label: string } {
+export function replicaHealth(liveWorkers: number): { cls: string; label: string } {
   if (liveWorkers === 0) return { cls: "bad", label: "no replicas" };
   if (liveWorkers < 3) return { cls: "warn", label: `${liveWorkers} replica${liveWorkers === 1 ? "" : "s"} (low)` };
   return { cls: "ok", label: `${liveWorkers} replicas` };
