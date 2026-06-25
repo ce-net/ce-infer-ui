@@ -24,6 +24,18 @@ Deploy like `ce-host`: a Vite static bundle served **on-LAN behind the SSO rever
 proxy**. The proxy authenticates the principal (OIDC/SAML) and fronts the router; the
 browser holds **no raw API token**.
 
+### Same-origin & strict CSP
+
+Every network call this app makes is **same-origin** and relative — `/router/*`,
+`/fleet/*`, and `/ce/*` are all resolved by the SSO reverse proxy (in dev, by Vite). The CE
+node read-path for the admin swarm view goes through `@ce-net/sdk` over that same-origin
+`/ce`. So the app runs cleanly under the strict CSP (`connect-src 'self'`): there is **no
+off-origin fetch** — no `ce-net.com/db`, no `cast.ce-net.com`, nothing public — which is
+exactly the PHI-confinement posture this console requires. The router and the regional
+ce-fleet delegates are deliberately **hospital-LAN services behind the SSO proxy, not public
+mesh ingress**; that is the correct boundary for an on-prem clinical app, so `ce-app expose`
+(public `*.user.ce-net.com`) does **not** apply here.
+
 ### Role bootstrap
 
 `lib/principal.ts` resolves the principal + role from, in order: a
